@@ -2,7 +2,7 @@
 
 import Foundation
 
-var rawInput: [String] = [
+var input: [String] = [
     "000011000110",
     "100110100101",
     "101100101001",
@@ -1004,48 +1004,89 @@ var rawInput: [String] = [
     "100001000000",
     "110100110111"
 ]
+let numberOfBits: Int = input[0].count
 
-let formattedInput: [[Bool]] = rawInput.map { bit in
-    bit.map { $0.wholeNumberValue == 1 }
-}
-
-let totalElements = formattedInput.count
-
-extension Collection where Self.Iterator.Element: RandomAccessCollection {
-    func transposed() -> [[Self.Iterator.Element.Iterator.Element]] {
-        guard let firstRow = self.first else { return [] }
-        return firstRow.indices.map { index in
-            self.map{ $0[index] }
-        }
+extension StringProtocol {
+    subscript(offset: Int) -> Character {
+        self[index(startIndex, offsetBy: offset)]
     }
 }
 
+// Part 1
 func part1() -> Int {
-    let transposedArray = formattedInput.transposed()
     
-    let countsOfTrueArray = transposedArray.map { bitPosArray in
-        bitPosArray.reduce(0) { $1 == true ? $0 + 1 : $0 }
-    }
-    
-    var gamma = "";
-    var epsilon = "";
-    
-    for countOfTrue in countsOfTrueArray {
-        let countOfFalse = totalElements - countOfTrue
-        if countOfTrue > countOfFalse {
-            gamma.append("1")
-            epsilon.append("0")
-        } else {
+    var gamma: String = ""
+    var epsilon: String = ""
+
+    for bitPosition in (0 ..< numberOfBits) {
+        let column = input.map({ $0[bitPosition] })
+        
+        let zeros = column.filter({ $0 == "0" }).count
+        let ones = column.filter({ $0 == "1" }).count
+        
+        if zeros > ones {
             gamma.append("0")
             epsilon.append("1")
+        } else {
+            gamma.append("1")
+            epsilon.append("0")
         }
     }
+
     
     return Int(gamma, radix: 2)! * Int(epsilon, radix: 2)!
 }
 
+// Part 2
+
 func part2() -> Int {
-    return 0
+//    var oxy = rawInput.map({ Array($0) })
+    var oxy = input.map({ Array($0) })
+    var co2 = input.map({ Array($0) })
+    
+    var bitPosition = 0
+    
+    // Filter Oxygen Reading for position
+    while (oxy.count > 1 && bitPosition < numberOfBits) {
+
+        let oxyColumn = oxy.map({ $0[bitPosition] })
+        
+        let oxyZeros = oxyColumn.filter({ $0 == "0" }).count
+        let oxyOnes = oxyColumn.filter({ $0 == "1" }).count
+        
+        if oxyOnes >= oxyZeros {
+            oxy = oxy.filter({ $0[bitPosition] == "1" })
+        } else {
+            oxy = oxy.filter({ $0[bitPosition] == "0" })
+        }
+        
+        bitPosition += 1
+    }
+    
+    // Reset bit position
+    bitPosition = 0
+    
+    // Filter CO2 Reading for position
+    while (co2.count > 1 && bitPosition < numberOfBits) {
+        
+        let co2Column = co2.map({ $0[bitPosition] })
+        
+        let co2Zeros = co2Column.filter({ $0 == "0" }).count
+        let co2Ones = co2Column.filter({ $0 == "1" }).count
+        
+        if co2Ones >= co2Zeros {
+            co2 = co2.filter({ $0[bitPosition] == "0" })
+        } else {
+            co2 = co2.filter({ $0[bitPosition] == "1" })
+        }
+        
+        bitPosition += 1
+    }
+    
+    let oxyRating = oxy.first!.map({ String($0) }).joined()
+    let co2Rating = co2.first!.map({ String($0) }).joined()
+    
+    return Int(oxyRating, radix: 2)! * Int(co2Rating, radix: 2)!
 }
 
 part1()
