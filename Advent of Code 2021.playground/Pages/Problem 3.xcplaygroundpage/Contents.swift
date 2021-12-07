@@ -1040,7 +1040,6 @@ func part1() -> Int {
 // Part 2
 
 func part2() -> Int {
-//    var oxy = rawInput.map({ Array($0) })
     var oxy = input.map({ Array($0) })
     var co2 = input.map({ Array($0) })
     
